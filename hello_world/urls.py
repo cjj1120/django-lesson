@@ -1,6 +1,7 @@
-from hello_world import views
 from django.urls import include, re_path
+from hello_world import views
 
+# SET THE NAMESPACE!
 app_name = 'hello_world'
 
 urlpatterns=[

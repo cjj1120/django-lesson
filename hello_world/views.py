@@ -7,15 +7,13 @@ from django.contrib.auth.decorators import login_required
 from hello_world.models import UserProfileInfo
 from hello_world.forms import UserForm, UserProfileInfoForm
 
-# Create your views here.
+@login_required
 def index(request):
     return render(request,'hello_world/index.html')
 
 @login_required
 def special(request):
-    all_users = UserProfileInfo.objects.select_related('user')
-    # for user in all_users:
-    #     print(user)
+    all_users=UserProfileInfo.objects.select_related('user')
     return HttpResponse(all_users[0].occupation)
 
 @login_required
@@ -24,21 +22,20 @@ def user_logout(request):
     return HttpResponseRedirect(reverse('index'))
 
 def register(request):
-    registered = False
+    registered=False
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileInfoForm(data=request.POST)
         if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
+            user = user_form.save() #returns a User object
             user.set_password(user.password)
             user.save()
-            profile = profile_form.save(commit=False)
+            profile = profile_form.save(commit=False) #returns a UserProfileInfo object
             profile.user=user
             profile.save()
-            registered = True
-        else:
-            print(user_form.errors, profile_form.errors)
-    else: # if GET request
+            registered=True
+    # for GET request
+    else:
         user_form = UserForm()
         profile_form = UserProfileInfoForm()
     
@@ -47,6 +44,7 @@ def register(request):
     'profile_form':profile_form,
     'registered':registered}
     )
+
 
 def user_login(request):
     if request.method == 'POST':
@@ -67,6 +65,7 @@ def user_login(request):
         return render(request,'hello_world/login.html')
 
 # READ
+@login_required
 def dashboard(request):
     all_users = UserProfileInfo.objects.select_related('user')
     return render(request,'hello_world/dashboard.html',{'all_users':all_users})
